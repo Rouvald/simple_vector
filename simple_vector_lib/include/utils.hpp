@@ -7,7 +7,7 @@
 
 namespace utils
 {
-    bool assert_with_msg(bool cond, const std::string& msg)
+    inline bool assert_with_msg(bool cond, const std::string& msg)
     {
         if (!cond)
         {
@@ -16,7 +16,7 @@ namespace utils
         return cond;
     }
 
-    uint32_t calculate_capacity(const uint32_t& size)
+    inline uint32_t calculate_capacity(const uint32_t& size)
     {
         // @todo: fix? diff formula or round
         return static_cast<uint32_t>(size * 1.5f);

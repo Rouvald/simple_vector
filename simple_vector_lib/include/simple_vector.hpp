@@ -31,8 +31,8 @@ public:
     inline uint32_t& size() { return this->_size; }
     inline uint32_t& capacity() { return this->_capacity; }
 
-    inline T& at(const uint32_t& index);
-    inline const T& at(const uint32_t& index) const;
+    T& at(const uint32_t& index);
+    const T& at(const uint32_t& index) const;
     const T& front() const;
     const T& back() const;
 
@@ -220,24 +220,22 @@ void simple_vector<T>::resize(const uint32_t& new_size)
 template <class T>
 void simple_vector<T>::erase(const uint32_t& index)
 {
-    assert(utils::assert_with_msg(0 != this->_size && index < this->_size,
-        "ERROR: incorrect size OR index"));
+    if(this->_size == 0 || index >= this->_size) return;
 
-    if (index <= (this->_size - 1))
+    if (index < (this->_size - 1))
     {
         for (uint32_t index_for = index; index_for < this->_size; ++index_for)
         {
             this->_data[index_for] = this->_data[index_for + 1];
         }
-        --this->_size;
     }
-    resize(this->_size);
+    resize(--this->_size);
 }
 
 template <class T>
 void simple_vector<T>::clear()
 {
-    assert(utils::assert_with_msg(0 != this->_size, "ERROR: incorrect size"));
+    if(this->_capacity == 0) return;
 
     clear_data();
 }
