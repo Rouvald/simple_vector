@@ -23,22 +23,24 @@ void test_dtor(const uint32_t& size)
 
 int main()
 {
-    std::cout << std::endl;
-    std::vector<uint32_t> vecqs = {1, 2, 4, 5, 6};
-    vecqs.reserve(100);
-    auto end{vecqs.end()};
-    std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
-              << std::endl;
-    vecqs.reserve(9);
-    std::cout << *(end - 1) << std::endl;
-    std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
-              << std::endl;
-    vecqs.resize(0);
-    std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
-              << std::endl;
-    vecqs.resize(2);
-    std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
-              << std::endl;
+    std::vector<uint32_t> vec22(0);
+    vec22.clear();
+    // std::cout << std::endl;
+    // std::vector<uint32_t> vecqs = {1, 2, 4, 5, 6};
+    // vecqs.reserve(100);
+    // auto end{vecqs.end()};
+    // std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
+    //           << std::endl;
+    // vecqs.reserve(9);
+    // std::cout << *(end - 1) << std::endl;
+    // std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
+    //           << std::endl;
+    // vecqs.resize(0);
+    // std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
+    //           << std::endl;
+    // vecqs.resize(2);
+    // std::cout << &vecqs[0] << '\t' << vecqs.size() << '\t' << vecqs.capacity()
+    //           << std::endl;
 
     // std::vector<uint32_t> vec12324(5);
     // std::vector<uint32_t> vec65765{5};
