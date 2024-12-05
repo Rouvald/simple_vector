@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <cassert>
+#include <algorithm>
 
 #include "utils.hpp"
 
@@ -15,28 +16,30 @@ class simple_vector
 public:
     simple_vector();
     // @todo: create ctor like vector () - some elems , {} - 1 elen with value
-    simple_vector(const uint32_t& new_size);
-    simple_vector(const simple_vector<T>& new_data);
+    explicit simple_vector(const uint32_t& new_size);
+    simple_vector(const simple_vector& new_vec);
+    simple_vector(const simple_vector&& new_vec) noexcept;
 
-    simple_vector<T>& operator=(const simple_vector<T>& arg);
+    simple_vector& operator=(const simple_vector& rhs);
+    simple_vector& operator=(const simple_vector&& rhs) noexcept;
 
     ~simple_vector();
 
     // getters
-    inline const T* data() const { return this->_data; }
-    inline const uint32_t& size() const { return this->_size; }
-    inline const uint32_t& capacity() const { return this->_capacity; }
+    const T* data() const { return this->_data; }
+    [[nodiscard]] const uint32_t& size() const { return this->_size; }
+    [[nodiscard]] const uint32_t& capacity() const { return this->_capacity; }
 
-    inline T* data() { return this->_data; }
-    inline uint32_t& size() { return this->_size; }
-    inline uint32_t& capacity() { return this->_capacity; }
+    T* data() { return this->_data; }
+    uint32_t& size() { return this->_size; }
+    uint32_t& capacity() { return this->_capacity; }
 
     T& at(const uint32_t& index);
     const T& at(const uint32_t& index) const;
     const T& front() const;
     const T& back() const;
 
-    inline bool is_empty() const;
+    [[nodiscard]] bool is_empty() const { return this->_size == 0; };
     void reserve(const uint32_t& _capacity);
     void resize(const uint32_t& _size);
 
@@ -48,16 +51,6 @@ private:
     uint32_t _size{0};
     uint32_t _capacity{0};
 
-    // setters
-    // inline void set_data(const simple_vector<T>& new_data)
-    // {
-    //     this->_data = new_data;
-    // }
-    // inline void set_size(const uint32_t& new_size) { this->_size = new_size;
-    // } inline void set_capacity(const uint32_t& new_capacity)
-    // {
-    //     this->_capacity = new_capacity;
-    // }
     void create_new_data(const uint32_t& new_capacity);
     void clear_data();
     void zeroing_data(const uint32_t& start, const uint32_t& end);
@@ -68,81 +61,96 @@ private:
 *******************************************************************************/
 
 template <class T>
-simple_vector<T>::simple_vector()
+simple_vector<T>::simple_vector() : _data{nullptr}, _size{0}, _capacity{0}
 {
-    this->_data = nullptr;
-    this->_size = 0;
-    this->_capacity = 0;
 }
 
 template <class T>
 simple_vector<T>::simple_vector(const uint32_t& new_size)
+    : _size{new_size},  //
+      _capacity{utils::calculate_capacity(new_size)}  //
 {
     if (new_size == 0)
     {
         simple_vector();
         return;
     }
-
-    this->_size = new_size;
-    this->_capacity = utils::calculate_capacity(new_size);
-
-    this->_data = new T[this->_capacity]{0};
-
-    for (uint32_t index = 0; index < new_size; ++index)
-    {
-        this->_data[index] = T{0};
-    }
+    this->_data = new T[utils::calculate_capacity(new_size)]{0};
+    std::fill_n(this->_data, new_size, T{0});
 }
 
 template <class T>
-simple_vector<T>::simple_vector(const simple_vector<T>& new_data)
+simple_vector<T>::simple_vector(const simple_vector<T>& new_vec)
+    : _size{new_vec.size()},  //
+      _capacity{new_vec.capacity()}  //
 {
-    if (new_data.capacity() == 0)
+    if (new_vec.capacity() == 0)
     {
         simple_vector();
         return;
     }
+    this->_data = new T[new_vec.capacity()]{0};
+    std::copy_n(new_vec.data(), new_vec.size(), this->_data);
+}
 
-    this->_size = new_data.size();
-    this->_capacity = new_data.capacity();
-
-    this->_data = new T[new_data.capacity()]{0};
-
-    for (uint32_t index = 0; index < new_data.size(); ++index)
+template <class T>
+simple_vector<T>::simple_vector(const simple_vector<T>&& new_vec) noexcept
+    : _data{new_vec.data()},  //
+      _size{new_vec.size()},  //
+      _capacity{new_vec.capacity()}  //
+{
+    if (new_vec.capacity() == 0)
     {
-        this->_data[index] = new_data.data()[index];
+        simple_vector();
+        return;
     }
+    new_vec.clear();
 }
 
 template <class T>
 simple_vector<T>& simple_vector<T>::operator=(const simple_vector<T>& rhs)
 {
     if (rhs.size() == 0)
+    {
         return *this;
-
+    }
     if (this == &rhs)
+    {
         return *this;
-
+    }
     if (this->_capacity >= rhs.size())
     {
-        for (uint32_t index = 0; index < rhs.size(); ++index)
-        {
-            this->_data[index] = rhs.data()[index];
-        }
+        std::copy_n(rhs.data(), rhs.size(), this->_data);
         this->_size = rhs.size();
         return *this;
     }
     T* new_arr = new T[rhs.capacity()]{0};
-
-    for (uint32_t index = 0; index < rhs.size(); ++index)
-    {
-        new_arr[index] = rhs.data()[index];
-    }
+    std::copy_n(rhs.data(), rhs.size(), new_arr);
     delete[] this->_data;
     this->_data = new_arr;
     this->_size = rhs.size();
     this->_capacity = rhs.capacity();
+    return *this;
+}
+
+template <class T>
+simple_vector<T>& simple_vector<T>::operator=(
+    const simple_vector<T>&& rhs) noexcept
+{
+    if (rhs.size() == 0)
+    {
+        return *this;
+    }
+    if (this == &rhs)
+    {
+        return *this;
+    }
+
+    this->_data = rhs.data();
+    this->_size = rhs.size();
+    this->_capacity = rhs.capacity();
+    rhs.clear();
+
     return *this;
 }
 
@@ -188,12 +196,6 @@ const T& simple_vector<T>::back() const
 }
 
 template <class T>
-inline bool simple_vector<T>::is_empty() const
-{
-    return this->_size == 0;
-}
-
-template <class T>
 void simple_vector<T>::reserve(const uint32_t& new_capacity)
 {
     if (new_capacity <= this->_capacity)
@@ -220,7 +222,10 @@ void simple_vector<T>::resize(const uint32_t& new_size)
 template <class T>
 void simple_vector<T>::erase(const uint32_t& index)
 {
-    if(this->_size == 0 || index >= this->_size) return;
+    if (this->_size == 0 || index >= this->_size)
+    {
+        return;
+    }
 
     if (index < (this->_size - 1))
     {
@@ -235,8 +240,10 @@ void simple_vector<T>::erase(const uint32_t& index)
 template <class T>
 void simple_vector<T>::clear()
 {
-    if(this->_capacity == 0) return;
-
+    if (this->_capacity == 0)
+    {
+        return;
+    }
     clear_data();
 }
 
@@ -251,11 +258,7 @@ void simple_vector<T>::create_new_data(const uint32_t& new_capacity)
         return;
     }
     T* new_arr = new T[new_capacity]{0};
-
-    for (uint32_t index = 0; index < this->_size; ++index)
-    {
-        new_arr[index] = this->_data[index];
-    }
+    std::copy_n(this->_data, this->_size, new_arr);
     delete[] this->_data;
     this->_data = new_arr;
     this->_capacity = new_capacity;
@@ -273,10 +276,10 @@ void simple_vector<T>::clear_data()
 template <class T>
 void simple_vector<T>::zeroing_data(const uint32_t& start, const uint32_t& end)
 {
-    assert(utils::assert_with_msg(start < end && 0 < start &&
-                                      start <= this->_capacity && 0 < end &&
-                                      end <= this->_capacity,
-        "ERROR: incorrect size"));
+    if (start > end || start > this->_capacity || end > this->_capacity)
+    {
+        return;
+    }
 
     for (uint32_t index = start; index < end; ++index)
     {
