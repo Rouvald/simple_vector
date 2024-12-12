@@ -26,6 +26,6 @@ fi
 rm -rf "${build_dir}"
 mkdir "${build_dir}"
 
-cmake -DCMAKE_BUILD_TYPE:STRING=${build_type} -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -S . -B "${build_dir}" -G "${cmake_generator}"
+cmake -DCMAKE_BUILD_TYPE:STRING=${build_type} -DCMAKE_CXX_COMPILER=g++ -S . -B "${build_dir}" -G "${cmake_generator}"
 cmake --build "${build_dir}" --config ${build_type} --target clean -j 18 --
 cmake --build "${build_dir}" --config ${build_type} --target all -j 18 --
