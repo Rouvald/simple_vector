@@ -1,5 +1,4 @@
 #include "simple_vector.hpp"
-#include "utils.hpp"
 #include <gtest/gtest.h>
 #include <random>
 
@@ -50,7 +49,7 @@ void test_getters_methods_vals(
     EXPECT_EQ(vec.capacity(), exp_data._capacity);
 }
 
-// @note: test const getterss
+// @note: test const getters
 template <class T>
 void test_getters_methods_const_vals(
     const simple_vector<T>& vec, const test_simple_vector<T>& exp_data)
@@ -91,8 +90,8 @@ TEST(test_simple_vector, ctor_with_size)
     {
         constexpr uint32_t size_1{0};
         simple_vector<uint32_t> vec_1{size_1};
-        const test_simple_vector<uint32_t> exp_data_1{
-            true, {}, size_1, utils::calculate_capacity(size_1)};
+        constexpr test_simple_vector<uint32_t> exp_data_1{
+            true, {}, size_1, size_1};
 
         test_vector_data(vec_1, exp_data_1);
     }
@@ -100,8 +99,8 @@ TEST(test_simple_vector, ctor_with_size)
     {
         constexpr uint32_t size_2 = 5;
         simple_vector<uint32_t> vec_2{size_2};
-        const test_simple_vector<uint32_t> exp_data_2{
-            false, {}, size_2, utils::calculate_capacity(size_2)};
+        constexpr test_simple_vector<uint32_t> exp_data_2{
+            false, {}, size_2, size_2};
         //
         test_vector_data(vec_2, exp_data_2);
 
@@ -119,8 +118,8 @@ TEST(test_simple_vector, ctor_with_vector)
         constexpr uint32_t size_1{0};
         const simple_vector<uint32_t> vec_1_1{size_1};
         simple_vector<uint32_t> vec_1_2{vec_1_1};
-        const test_simple_vector<uint32_t> exp_data_1{true, {}, vec_1_1.size(),
-            utils::calculate_capacity(vec_1_1.size())};
+        const test_simple_vector<uint32_t> exp_data_1{
+            true, {}, vec_1_1.size(), vec_1_1.capacity()};
 
         test_vector_data(vec_1_2, exp_data_1);
     }
@@ -130,8 +129,8 @@ TEST(test_simple_vector, ctor_with_vector)
         const simple_vector<uint32_t> vec_2_1{size_2};
         simple_vector<uint32_t> vec_2_2{vec_2_1};
 
-        const test_simple_vector<uint32_t> exp_data_2{false, {}, vec_2_1.size(),
-            utils::calculate_capacity(vec_2_1.size())};
+        const test_simple_vector<uint32_t> exp_data_2{
+            false, {}, vec_2_1.size(), vec_2_1.capacity()};
 
         test_vector_data(vec_2_2, exp_data_2);
 
@@ -150,8 +149,8 @@ TEST(test_simple_vector, ctor_with_vector)
         }
         simple_vector<uint32_t> vec_3_2{vec_3_1};
 
-        const test_simple_vector<uint32_t> exp_data_3{false, {}, vec_3_1.size(),
-            utils::calculate_capacity(vec_3_1.size())};
+        const test_simple_vector<uint32_t> exp_data_3{
+            false, {}, vec_3_1.size(), vec_3_1.capacity()};
 
         test_vector_data(vec_3_2, exp_data_3);
         for (uint32_t index = 0; index < vec_3_2.size(); ++index)
@@ -238,6 +237,12 @@ TEST(test_simple_vector, ctor_copy)
             EXPECT_EQ(vec_5_lhs.data()[index], vec_5_rhs.data()[index]);
         }
     }
+}
+
+TEST(test_simple_vector, ctor_move)
+{
+    // @todo: add
+    EXPECT_TRUE(false);
 }
 
 TEST(test_simple_vector, dtor)
@@ -482,8 +487,7 @@ TEST(test_simple_vector, vec_resize)
         simple_vector<uint32_t> vec_2(size_2);
         const test_simple_vector<uint32_t> exp_data_2{
             false, {true, true, vec_2.data()},
-             0,
-            utils::calculate_capacity(size_2)
+             0, size_2
         };
         vec_2.resize(0);
         test_vector_data(vec_2, exp_data_2);
@@ -494,9 +498,10 @@ TEST(test_simple_vector, vec_resize)
         constexpr uint32_t resize_3{size_3 - sub};
         simple_vector<uint32_t> vec_3(size_3);
         const test_simple_vector<uint32_t> exp_data_3{
-            false, {}, resize_3, utils::calculate_capacity(size_3)};
+            false, {}, resize_3, vec_3.capacity()};
 
         vec_3.resize(resize_3);
+
         test_vector_data(vec_3, exp_data_3);
     }
     // @note: size != 0, new_size > capacity
@@ -504,10 +509,11 @@ TEST(test_simple_vector, vec_resize)
         constexpr uint32_t size_4{8}, add{5};
         constexpr uint32_t resize_4{size_4 + add};
         simple_vector<uint32_t> vec_4(size_4);
-        const test_simple_vector<uint32_t> exp_data_4{
-            false, {}, resize_4, utils::calculate_capacity(resize_4)};
+        constexpr test_simple_vector<uint32_t> exp_data_4{
+            false, {}, resize_4, resize_4};
 
         vec_4.resize(resize_4);
+
         test_vector_data(vec_4, exp_data_4);
     }
     // @note: size != 0,
@@ -533,8 +539,7 @@ TEST(test_simple_vector, vec_erase)
         simple_vector<uint32_t> vec_2{size_2};
         const test_simple_vector<uint32_t> exp_data_2{
             false, {true, true, vec_2.data()},
-             size_2,
-            utils::calculate_capacity(size_2)
+             size_2, vec_2.capacity()
         };
 
         for (uint32_t index = 0; index < amount_2; ++index)
@@ -549,8 +554,7 @@ TEST(test_simple_vector, vec_erase)
         simple_vector<uint32_t> vec_3{size_3};
         const test_simple_vector<uint32_t> exp_data_3{
             false, {true, true, vec_3.data()},
-             size_3,
-            utils::calculate_capacity(size_3)
+             size_3, vec_3.capacity()
         };
 
         vec_3.erase(size_3);
@@ -562,8 +566,7 @@ TEST(test_simple_vector, vec_erase)
         simple_vector<uint32_t> vec_4{size_4};
         const test_simple_vector<uint32_t> exp_data_4{
             false, {true, true, vec_4.data()},
-             size_4 - 1,
-            utils::calculate_capacity(size_4)
+             size_4 - 1, vec_4.capacity()
         };
 
         vec_4.erase(size_4 - 1);
@@ -575,8 +578,7 @@ TEST(test_simple_vector, vec_erase)
         simple_vector<uint32_t> vec_5{size_5};
         test_simple_vector<uint32_t> exp_data_5{
             false, {true, true, vec_5.data()},
-             size_5,
-            utils::calculate_capacity(size_5)
+             size_5, vec_5.capacity()
         };
 
         while (vec_5.size() != 0 && exp_data_5._size != 0)
@@ -606,4 +608,15 @@ TEST(test_simple_vector, vec_clear)
         vec_2.clear();
         test_vector_data(vec_2, exp_data_2);
     }
+}
+
+// @todo: push_back
+TEST(test_simple_vector, push_back)
+{
+    EXPECT_TRUE(false);
+}
+// @todo: pop_back
+TEST(test_simple_vector, pop_back)
+{
+    EXPECT_TRUE(false);
 }
