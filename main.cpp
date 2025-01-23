@@ -30,18 +30,39 @@ int main()
 
     for (uint32_t index = 0; index < vec_1.size(); ++index)
     {
-        vec_1.at(index) = index + 13;
-        vec_2.at(index) = index + 23;
+        vec_1.data()[index] = index + 13;
+        vec_2.data()[index] = index + 100;
     }
 
-    print_vector(vec_1, "test");
-    print_vector(vec_2, "test");
+    for (uint32_t index = 0; index < vec_1.capacity(); ++index)
+    {
+        std::cout << vec_1.data()[index] << std::endl;
+    }
 
-    vec_1 = std::move(vec_2);
+    vec_1.resize(2);
+    std::cout << &vec_1.data()[0] << std::endl;
+    ;
+    std::cout << &vec_2.data()[0] << std::endl;
+    ;
 
-    print_vector(vec_1, "test");
+    print_vector(vec_1, "vec_1");
+    print_vector(vec_2, "vec_2");
+    vec_2 = std::move(vec_1);
+    std::cout << &vec_1.data()[0] << std::endl;
+    ;
+    std::cout << &vec_2.data()[0] << std::endl;
+    ;
 
-    simple_vector<uint32_t> vec_3(std::move(vec_1));
+    print_vector(vec_2, "vec_2");
+
+    simple_vector<uint32_t> vec_3(std::move(vec_2));
+
+    std::cout << &vec_2.data()[0] << std::endl;
+    ;
+    std::cout << &vec_3.data()[0] << std::endl;
+    ;
+
+    print_vector(vec_3, "vec_3");
 
     return 0;
 }
