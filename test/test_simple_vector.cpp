@@ -1,10 +1,10 @@
 #include "simple_vector.hpp"
-#include "utils.hpp"
 #include <gtest/gtest.h>
 #include <random>
 
-
 // @todo: global TODO: rewrite all notes with possible variants
+
+constexpr uint8_t ZERO{0};
 
 template <class T>
 struct test_data_ptr
@@ -32,7 +32,7 @@ uint32_t random_value(const uint32_t& min, const uint32_t& max)
     return (std::rand() % diap_vals) + min;
 }
 
-// @todo we have 2 equals methods, need optimiazztion
+// @todo we have 2 equals methods, need optimiazation
 // @note: test default getters values
 template <class T>
 void test_getters_methods_vals(
@@ -51,13 +51,14 @@ void test_getters_methods_vals(
     EXPECT_EQ(vec.capacity(), exp_data._capacity);
 }
 
-// @note: test const getterss
+// @note: test const getters
 template <class T>
 void test_getters_methods_const_vals(
     const simple_vector<T>& vec, const test_simple_vector<T>& exp_data)
 {
     EXPECT_TRUE(exp_data.b_is_data_null ? vec.data() == nullptr
                                         : vec.data() != nullptr);
+
     if (exp_data.test_data.b_need_test_ptr)
     {
         EXPECT_TRUE(exp_data.test_data.b_is_ptr_equals
@@ -73,88 +74,84 @@ void test_vector_data(
     simple_vector<T>& vec, const test_simple_vector<T>& exp_data)
 {
     test_getters_methods_vals(vec, exp_data);
+    // test_getters_methods_vals( const_cast<simple_vector<T>&>(vec), exp_data);
     test_getters_methods_const_vals(vec, exp_data);
 }
 
 TEST(test_simple_vector, ctor_def)
 {
     simple_vector<uint32_t> vec;
-    const test_simple_vector<uint32_t> exp_data{true, {0}, 0, 0};
+    constexpr test_simple_vector<uint32_t> exp_data{true, {}, ZERO, ZERO};
 
     test_vector_data(vec, exp_data);
 }
 
 TEST(test_simple_vector, ctor_with_size)
 {
-    // @note: test zero size ctor
+    // @note: size == 0
     {
-        constexpr uint32_t size_1{0};
-        simple_vector<uint32_t> vec_1{size_1};
-        const test_simple_vector<uint32_t> exp_data_1{
-            true, {0}, size_1, utils::calculate_capacity(size_1)};
+        simple_vector<uint32_t> vec_1{ZERO};
+        constexpr test_simple_vector<uint32_t> exp_data_1{true, {}, ZERO, ZERO};
 
         test_vector_data(vec_1, exp_data_1);
     }
-    // @note: test some value ctor
+    // @note: size != 0
     {
         constexpr uint32_t size_2 = 5;
         simple_vector<uint32_t> vec_2{size_2};
-        const test_simple_vector<uint32_t> exp_data_2{
-            false, {0}, size_2, utils::calculate_capacity(size_2)};
+        constexpr test_simple_vector<uint32_t> exp_data_2{
+            false, {}, size_2, size_2};
         //
         test_vector_data(vec_2, exp_data_2);
 
-        // @note: test some size data
         for (uint32_t index = 0; index < vec_2.size(); ++index)
         {
-            EXPECT_EQ(vec_2.data()[index], 0);
+            EXPECT_EQ(vec_2.data()[index], ZERO);
         }
     }
 }
 
 TEST(test_simple_vector, ctor_with_vector)
 {
-    // @note: test zero size ctor
+    // @note: size == 0
     {
-        constexpr uint32_t size_1{0};
-        const simple_vector<uint32_t> vec_1_1{size_1};
+        const simple_vector<uint32_t> vec_1_1{ZERO};
         simple_vector<uint32_t> vec_1_2{vec_1_1};
-        const test_simple_vector<uint32_t> exp_data_1{true, {0}, vec_1_1.size(),
-            utils::calculate_capacity(vec_1_1.size())};
+        const test_simple_vector<uint32_t> exp_data_1{
+            true, {}, vec_1_1.size(), vec_1_1.capacity()};
 
         test_vector_data(vec_1_2, exp_data_1);
     }
-    // @note: test some size ctor
+    // @note: size != 0
     {
         constexpr uint32_t size_2{5};
         const simple_vector<uint32_t> vec_2_1{size_2};
         simple_vector<uint32_t> vec_2_2{vec_2_1};
-        //
-        const test_simple_vector<uint32_t> exp_data_2{false, {0},
-            vec_2_1.size(), utils::calculate_capacity(vec_2_1.size())};
-        //
+
+        const test_simple_vector<uint32_t> exp_data_2{
+            false, {}, vec_2_1.size(), vec_2_1.capacity()};
+
         test_vector_data(vec_2_2, exp_data_2);
 
         for (uint32_t index = 0; index < vec_2_2.size(); ++index)
         {
-            EXPECT_EQ(vec_2_2.data()[index], 0);
+            EXPECT_EQ(vec_2_2.data()[index], ZERO);
         }
     }
-    // @note: test some size with values
+    // @note: size != 0, fill random data
     {
         constexpr uint32_t size_3{7};
         simple_vector<uint32_t> vec_3_1{size_3};
         for (uint32_t index = 0; index < vec_3_1.size(); ++index)
         {
-            vec_3_1.data()[index] = random_value(0, 100);
+            vec_3_1.data()[index] = random_value(ZERO, 100);
         }
         simple_vector<uint32_t> vec_3_2{vec_3_1};
-        //
-        const test_simple_vector<uint32_t> exp_data_3{false, {0},
-            vec_3_1.size(), utils::calculate_capacity(vec_3_1.size())};
-        //
-        test_vector_data(vec_3_2, exp_data_3);
 
+        const test_simple_vector<uint32_t> exp_data_3{
+            false, {}, vec_3_1.size(), vec_3_1.capacity()};
+
+        test_vector_data(vec_3_2, exp_data_3);
         for (uint32_t index = 0; index < vec_3_2.size(); ++index)
         {
             EXPECT_EQ(vec_3_2.data()[index], vec_3_1.data()[index]);
@@ -162,69 +159,87 @@ TEST(test_simple_vector, ctor_with_vector)
     }
 }
 
-TEST(test_simple_vector, ctor_copy)
+TEST(test_simple_vector, op_assign_copy)
 {
-    // @note: test zero size copy ctor
+    // @note: both vectors size == 0
     {
-        constexpr uint32_t size_1{0};
-        simple_vector<uint32_t> vec_1_lhs{size_1}, vec_1_rhs{size_1};
-        vec_1_lhs = vec_1_rhs;
-
+        simple_vector<uint32_t> vec_1_lhs{ZERO}, vec_1_rhs{ZERO};
         const test_simple_vector<uint32_t> exp_data_1{
-            true, {0}, vec_1_rhs.size(), vec_1_rhs.capacity()};
+            true, {}, vec_1_rhs.size(), vec_1_rhs.capacity()};
 
+        vec_1_lhs = vec_1_rhs;
         test_vector_data(vec_1_lhs, exp_data_1);
     }
-    // @note: test some size copy ctor
+    // @note: vector lhs size == 0, vector rhs size != 0, fill random data
     {
         constexpr uint32_t size_2{5};
-        simple_vector<uint32_t> vec_2_lhs{size_2}, vec_2_rhs{size_2};
+        simple_vector<uint32_t> vec_2_lhs{ZERO}, vec_2_rhs{size_2};
+        for (uint32_t index = 0; index < vec_2_rhs.size(); ++index)
+        {
+            vec_2_rhs.data()[index] = random_value(ZERO, 100);
+        }
+        const test_simple_vector<uint32_t> exp_data_2_lhs{
+            false, {true, false, vec_2_lhs.data()},
+             vec_2_rhs.size(),
+            vec_2_rhs.capacity()
+        },
+            exp_data_2_rhs{false, {true, true, vec_2_rhs.data()},
+                vec_2_rhs.size(), vec_2_rhs.capacity()};
+
         vec_2_lhs = vec_2_rhs;
+        test_vector_data(vec_2_lhs, exp_data_2_lhs);
+        test_vector_data(vec_2_rhs, exp_data_2_rhs);
 
-        const test_simple_vector<uint32_t> exp_data_2{
-            false, {0}, vec_2_rhs.size(), vec_2_rhs.capacity()};  // @todo
-
-        test_vector_data(vec_2_lhs, exp_data_2);
+        for (uint32_t index = 0; index < vec_2_rhs.size(); ++index)
+        {
+            EXPECT_EQ(vec_2_lhs.data()[index], vec_2_rhs.data()[index]);
+        }
     }
-    // @note: test some size with values copy ctor
+    // @note: vector lhs size != 0, vector rhs size == 0
     {
         constexpr uint32_t size_3{8};
-        simple_vector<uint32_t> vec_3_lhs{size_3}, vec_3_rhs{size_3};
-        for (uint32_t index = 0; index < vec_3_rhs.size(); ++index)
-        {
-            vec_3_rhs.data()[index] = random_value(0, 100);
-        }
+        simple_vector<uint32_t> vec_3_lhs{size_3}, vec_3_rhs{ZERO};
+        const test_simple_vector<uint32_t> exp_data_3_lhs{
+            true, {true, false, vec_3_lhs.data()},
+             vec_3_rhs.size(),
+            vec_3_rhs.capacity()
+        },
+            exp_data_3_rhs{true, {true, true, vec_3_rhs.data()},
+                vec_3_rhs.size(), vec_3_rhs.capacity()};
+
         vec_3_lhs = vec_3_rhs;
 
-        const test_simple_vector<uint32_t> exp_data_3{
-            false, {0}, vec_3_rhs.size(), vec_3_rhs.capacity()};  // @todo
-
-        test_vector_data(vec_3_lhs, exp_data_3);
+        test_vector_data(vec_3_lhs, exp_data_3_lhs);
+        test_vector_data(vec_3_rhs, exp_data_3_rhs);
     }
     // @note: test diff size copy ctor
     {
-        constexpr uint32_t size_4_1{6}, size_4_2{20};
+        constexpr uint32_t size_4_1{20}, size_4_2{6};
         simple_vector<uint32_t> vec_4_lhs{size_4_1}, vec_4_rhs{size_4_2};
-        vec_4_lhs = vec_4_rhs;
-
         const test_simple_vector<uint32_t> exp_data_4{
-            false, {0}, vec_4_rhs.size(), vec_4_rhs.capacity()};
+            false, {true, true, vec_4_lhs.data()},
+             vec_4_rhs.size(),
+            vec_4_lhs.capacity()
+        };
 
+        vec_4_lhs = vec_4_rhs;
         test_vector_data(vec_4_lhs, exp_data_4);
     }
     // @note: test diff size with values copy ctor
     {
-        constexpr uint32_t size_5_1{4}, size_5_2{18};
+        constexpr uint32_t size_5_1{18}, size_5_2{4};
         simple_vector<uint32_t> vec_5_lhs{size_5_1}, vec_5_rhs{size_5_2};
         for (uint32_t index = 0; index < vec_5_rhs.size(); ++index)
         {
-            vec_5_rhs.data()[index] = random_value(0, 100);
+            vec_5_rhs.data()[index] = random_value(ZERO, 100);
         }
-        vec_5_lhs = vec_5_rhs;
-
         const test_simple_vector<uint32_t> exp_data_5{
-            false, {0}, vec_5_rhs.size(), vec_5_rhs.capacity()};
+            false, {true, true, vec_5_lhs.data()},
+             vec_5_rhs.size(),
+            vec_5_lhs.capacity()
+        };
 
+        vec_5_lhs = vec_5_rhs;
         test_vector_data(vec_5_lhs, exp_data_5);
 
         for (uint32_t index = 0; index < vec_5_rhs.size(); ++index)
@@ -234,18 +249,118 @@ TEST(test_simple_vector, ctor_copy)
     }
 }
 
-TEST(test_simple_vector, dtor)  // @todo: needed??
+TEST(test_simple_vector, op_assign_move)
 {
-    // @todo:
+    // @note: both vectors size == 0
+    {
+        simple_vector<uint32_t> vec_1_lhs{ZERO}, vec_1_rhs{ZERO};
+        const test_simple_vector<uint32_t> exp_data_1_lhs{
+            true, {}, vec_1_rhs.size(), vec_1_rhs.capacity()};
+        constexpr test_simple_vector<uint32_t> exp_data_1_rhs{
+            true, {}, ZERO, ZERO};
+
+        vec_1_lhs = std::move(vec_1_rhs);
+        test_vector_data(vec_1_lhs, exp_data_1_lhs);
+        test_vector_data(vec_1_rhs, exp_data_1_rhs);
+    }
+    // @note: vector lhs size == 0, vector rhs size != 0, fill random data
+    {
+        constexpr uint32_t size_2{5};
+        simple_vector<uint32_t> vec_2_lhs{ZERO}, vec_2_rhs{size_2};
+        for (uint32_t index = 0; index < vec_2_rhs.size(); ++index)
+        {
+            vec_2_rhs.data()[index] = random_value(ZERO, 100);
+        }
+
+        const test_simple_vector<uint32_t> exp_data_2_lhs{
+            false, {true, false, vec_2_lhs.data()},
+             vec_2_rhs.size(),
+            vec_2_rhs.capacity()
+        };
+        constexpr test_simple_vector<uint32_t> exp_data_2_rhs{
+            true, {}, ZERO, ZERO};
+
+        vec_2_lhs = std::move(vec_2_rhs);
+
+        test_vector_data(vec_2_lhs, exp_data_2_lhs);
+        test_vector_data(vec_2_rhs, exp_data_2_rhs);
+        for (uint32_t index = 0; index < vec_2_rhs.size(); ++index)
+        {
+            EXPECT_EQ(vec_2_lhs.data()[index], vec_2_rhs.data()[index]);
+        }
+    }
+    // @note: vector 1 size != 0, fill random data, vector 2 size == 0
+    {
+        constexpr uint32_t size_3{8};
+        simple_vector<uint32_t> vec_3_lhs{ZERO}, vec_3_rhs{size_3};
+        for (uint32_t index = 0; index < vec_3_rhs.size(); ++index)
+        {
+            vec_3_rhs.data()[index] = random_value(ZERO, 100);
+        }
+        const test_simple_vector<uint32_t> exp_data_3_lhs{
+            false, {}, vec_3_rhs.size(), vec_3_rhs.capacity()};
+        constexpr test_simple_vector<uint32_t> exp_data_3_rhs{
+            true, {}, ZERO, ZERO};
+
+        vec_3_lhs = std::move(vec_3_rhs);
+
+        test_vector_data(vec_3_lhs, exp_data_3_lhs);
+        test_vector_data(vec_3_rhs, exp_data_3_rhs);
+    }
+    // @note: test diff size copy ctor
+    {
+        constexpr uint32_t size_4_1{20}, size_4_2{6};
+        simple_vector<uint32_t> vec_4_lhs{size_4_1}, vec_4_rhs{size_4_2};
+        const test_simple_vector<uint32_t> exp_data_4_lhs{
+            false, {true, true, vec_4_rhs.data()},
+             vec_4_rhs.size(),
+            vec_4_rhs.capacity()
+        };
+        constexpr test_simple_vector<uint32_t> exp_data_4_rhs{
+            true, {}, ZERO, ZERO};
+
+        vec_4_lhs = std::move(vec_4_rhs);
+        test_vector_data(vec_4_lhs, exp_data_4_lhs);
+        test_vector_data(vec_4_rhs, exp_data_4_rhs);
+    }
+    // @note: test diff size with values copy ctor
+    {
+        constexpr uint32_t size_5_1{18}, size_5_2{4};
+        simple_vector<uint32_t> vec_5_lhs{size_5_1}, vec_5_rhs{size_5_2};
+        for (uint32_t index = 0; index < vec_5_rhs.size(); ++index)
+        {
+            vec_5_rhs.data()[index] = random_value(ZERO, 100);
+        }
+        const test_simple_vector<uint32_t> exp_data_5_lhs{
+            false, {true, true, vec_5_rhs.data()},
+             vec_5_rhs.size(),
+            vec_5_rhs.capacity()
+        };
+        constexpr test_simple_vector<uint32_t> exp_data_5_rhs{
+            true, {}, ZERO, ZERO};
+
+        vec_5_lhs = std::move(vec_5_rhs);
+        test_vector_data(vec_5_lhs, exp_data_5_lhs);
+        test_vector_data(vec_5_rhs, exp_data_5_rhs);
+
+        for (uint32_t index = 0; index < vec_5_rhs.size(); ++index)
+        {
+            EXPECT_EQ(vec_5_lhs.data()[index], vec_5_rhs.data()[index]);
+        }
+    }
+}
+
+TEST(test_simple_vector, dtor)
+{
+    // @note: test dtor
     simple_vector<uint32_t> vec{10};
     for (uint32_t index = 0; index < vec.size(); ++index)
     {
-        vec.data()[index] = random_value(0, 100);
+        vec.data()[index] = random_value(ZERO, 100);
     }
+    constexpr test_simple_vector<uint32_t> exp_data{true, {}, ZERO, ZERO};
+
     vec.~simple_vector();
-
-    const test_simple_vector<uint32_t> exp_data{true, {0}, 0, 0};
-
     test_vector_data(vec, exp_data);
 }
 
@@ -253,7 +368,7 @@ TEST(test_simple_vector, methods_at)
 {
     // @note: lambdas test const at() methods
     const auto func_const_at_zero_size{[&](const simple_vector<uint32_t>& vec)
-        { EXPECT_DEATH(vec.at(0), "ERROR: incorrect size OR index"); }};
+        { EXPECT_DEATH(vec.at(ZERO), "ERROR: incorrect size OR index"); }};
     const auto func_const_at_with_data{
         [&](const simple_vector<uint32_t>& vec, const uint32_t* vec_c,
             const uint32_t& size)
@@ -263,31 +378,31 @@ TEST(test_simple_vector, methods_at)
                 EXPECT_EQ(vec.at(index), vec_c[index]);
             }
         }};
-    // @todo:
+    // @note: DEATH size == 0
     {
         simple_vector<uint32_t> vec_1;
-        EXPECT_DEATH(vec_1.at(0), "ERROR: incorrect size OR index");
+        EXPECT_DEATH(vec_1.at(ZERO), "ERROR: incorrect size OR index");
         func_const_at_zero_size(vec_1);
     }
-    // @todo:
+    // @note: size != 0
     {
         constexpr uint32_t size_2{5};
         simple_vector<uint32_t> vec_2{size_2};
-        uint32_t vec_2_c[size_2] = {0};
+        uint32_t vec_2_c[size_2] = {ZERO};
         for (uint32_t index = 0; index < vec_2.size(); ++index)
         {
             EXPECT_EQ(vec_2.at(index), vec_2_c[index]);
         }
         func_const_at_with_data(vec_2, vec_2_c, size_2);
     }
-    // @todo:
+    // @note: size != 0, fill random data
     {
         constexpr uint32_t size_3{11};
         simple_vector<uint32_t> vec_3{size_3};
-        uint32_t vec_3_c[size_3] = {0};
+        uint32_t vec_3_c[size_3] = {ZERO};
         for (uint32_t index = 0; index < vec_3.size(); ++index)
         {
-            const uint32_t val{random_value(0, 100)};
+            const uint32_t val{random_value(ZERO, 100)};
             vec_3.at(index) = val;
             vec_3_c[index] = val;
         }
@@ -301,55 +416,55 @@ TEST(test_simple_vector, methods_at)
 
 TEST(test_simple_vector, vec_front)
 {
-    // @todo:
+    // @note: DEATH size == 0
     {
         simple_vector<uint32_t> vec_1;
         EXPECT_DEATH(vec_1.front(), "ERROR: incorrect size");
     }
-    // @todo:
+    // @note: size != 0
     {
         constexpr uint32_t size_2{5};
         simple_vector<uint32_t> vec_2{size_2};
-        uint32_t vec_2_c[size_2] = {0};
-        EXPECT_EQ(vec_2.front(), vec_2_c[0]);
+        uint32_t vec_2_c[size_2] = {ZERO};
+        EXPECT_EQ(vec_2.front(), vec_2_c[ZERO]);
     }
-    // @todo:
+    // @tnote: size != 0, fill random data
     {
         constexpr uint32_t size_3{11};
         simple_vector<uint32_t> vec_3{size_3};
-        uint32_t vec_3_c[size_3] = {0};
+        uint32_t vec_3_c[size_3] = {ZERO};
         for (uint32_t index = 0; index < vec_3.size(); ++index)
         {
-            const uint32_t val{random_value(0, 100)};
+            const uint32_t val{random_value(ZERO, 100)};
             vec_3.at(index) = val;
             vec_3_c[index] = val;
         }
-        EXPECT_EQ(vec_3.front(), vec_3_c[0]);
+        EXPECT_EQ(vec_3.front(), vec_3_c[ZERO]);
     }
 }
 
 TEST(test_simple_vector, vec_back)
 {
-    // @todo:
+    // @note: DEATH size == 0
     {
         simple_vector<uint32_t> vec_1;
         EXPECT_DEATH(vec_1.back(), "ERROR: incorrect size");
     }
-    // @todo:
+    // @note: size != 0
     {
         constexpr uint32_t size_2{5};
         simple_vector<uint32_t> vec_2{size_2};
-        uint32_t vec_2_c[size_2] = {0};
+        uint32_t vec_2_c[size_2] = {ZERO};
         EXPECT_EQ(vec_2.back(), vec_2_c[size_2 - 1]);
     }
-    // @todo:
+    // @tnote: size != 0, fill random data
     {
         constexpr uint32_t size_3{11};
         simple_vector<uint32_t> vec_3{size_3};
-        uint32_t vec_3_c[size_3] = {0};
+        uint32_t vec_3_c[size_3] = {ZERO};
         for (uint32_t index = 0; index < vec_3.size(); ++index)
         {
-            const uint32_t val{random_value(0, 100)};
+            const uint32_t val{random_value(ZERO, 100)};
             vec_3.at(index) = val;
             vec_3_c[index] = val;
         }
@@ -359,12 +474,12 @@ TEST(test_simple_vector, vec_back)
 
 TEST(test_simple_vector, vec_is_empty)
 {
-    // @todo:
+    // @note: szie == 0
     {
         simple_vector<uint32_t> vec_1;
         EXPECT_TRUE(vec_1.is_empty());
     }
-    // @todo:
+    // @note: size != 0
     {
         constexpr uint32_t size_2{13};
         simple_vector<uint32_t> vec_2{size_2};
@@ -374,16 +489,23 @@ TEST(test_simple_vector, vec_is_empty)
 
 TEST(test_simple_vector, vec_reserve)
 {
-    // @todo
+    // @note: size == 0, reserved capacity: 1) == 0,
+    //                                      2) != 0
     {
-        constexpr uint32_t capacity_1{0};
+        constexpr uint32_t capacity_1{5};
         simple_vector<uint32_t> vec;
-        const test_simple_vector<uint32_t> exp_data_1{true, {0}, 0, capacity_1};
+        test_simple_vector<uint32_t> exp_data_1{true, {}, ZERO, ZERO};
 
+        vec.reserve(ZERO);
+        test_vector_data(vec, exp_data_1);
+
+        exp_data_1.b_is_data_null = false;
+        exp_data_1._capacity = capacity_1;
         vec.reserve(capacity_1);
         test_vector_data(vec, exp_data_1);
     }
-    // @note: test reserve some size wuth zero value
+    // @note: size != 0, reserved capacity: 1) < _capacity
+    //                                      2) > _capacity
     {
         constexpr uint32_t size_2{10}, amount_2{7}, sub{4};
         simple_vector<uint32_t> vec_2{size_2};
@@ -392,7 +514,6 @@ TEST(test_simple_vector, vec_reserve)
              size_2, vec_2.capacity()
         };
 
-        // test new_capacity < _capacity
         vec_2.reserve(vec_2.capacity() - sub);
         test_vector_data(vec_2, exp_data_2);
 
@@ -405,11 +526,12 @@ TEST(test_simple_vector, vec_reserve)
             test_vector_data(vec_2, exp_data_2);
         }
     }
-    // @note: test reserve some size with some value
+    // @note: size != 0, fiil random data, reserved capacity: 1) < _capacity
+    //                                                        2) > _capacity
     {
         constexpr uint32_t size_3{9}, sub{5};
         simple_vector<uint32_t> vec_3{size_3};
-        uint32_t vec_3_c[size_3] = {0};
+        uint32_t vec_3_c[size_3] = {ZERO};
 
         test_simple_vector<uint32_t> exp_data_3{
             false, {true, true, vec_3.data()},
@@ -418,7 +540,7 @@ TEST(test_simple_vector, vec_reserve)
 
         for (uint32_t index = 0; index < vec_3.size(); ++index)
         {
-            const uint32_t val{random_value(0, 100)};
+            const uint32_t val{random_value(ZERO, 100)};
             vec_3.at(index) = val;
             vec_3_c[index] = val;
         }
@@ -439,8 +561,17 @@ TEST(test_simple_vector, vec_reserve)
             EXPECT_EQ(vec_3.at(index), vec_3_c[index]);
         }
     }
-    // @todo: check capacity < size
+    // @note: size != 0, reserved capacity < _size
     {
+        constexpr uint32_t size_4{9}, reserved_capacity_4{6};
+        simple_vector<uint32_t> vec_4{size_4};
+
+        test_simple_vector<uint32_t> exp_data_4{
+            false, {true, true, vec_4.data()},
+             size_4, vec_4.capacity()
+        };
+        vec_4.reserve(reserved_capacity_4);
+        test_vector_data(vec_4, exp_data_4);
     }
 }
 
@@ -448,11 +579,10 @@ TEST(test_simple_vector, vec_resize)
 {
     // @note: size == 0, new_size == 0
     {
-        constexpr uint32_t size_1{0};
         simple_vector<uint32_t> vec_1;
-        const test_simple_vector<uint32_t> exp_data_1{true, {0}, 0, size_1};
+        constexpr test_simple_vector<uint32_t> exp_data_1{true, {}, ZERO, ZERO};
 
-        vec_1.resize(size_1);
+        vec_1.resize(ZERO);
         test_vector_data(vec_1, exp_data_1);
     }
     // @note: size != 0, new_size == 0
@@ -461,21 +591,21 @@ TEST(test_simple_vector, vec_resize)
         simple_vector<uint32_t> vec_2(size_2);
         const test_simple_vector<uint32_t> exp_data_2{
             false, {true, true, vec_2.data()},
-             0,
-            utils::calculate_capacity(size_2)
+             ZERO, size_2
         };
-        vec_2.resize(0);
+        vec_2.resize(ZERO);
         test_vector_data(vec_2, exp_data_2);
     }
-    // @note: size != 0. new_size <= capacity
+    // @note: size != 0. new_size < capacity
     {
         constexpr uint32_t size_3{7}, sub{2};
         constexpr uint32_t resize_3{size_3 - sub};
         simple_vector<uint32_t> vec_3(size_3);
         const test_simple_vector<uint32_t> exp_data_3{
-            false, {0}, resize_3, utils::calculate_capacity(size_3)};
+            false, {}, resize_3, vec_3.capacity()};
 
         vec_3.resize(resize_3);
+
         test_vector_data(vec_3, exp_data_3);
     }
     // @note: size != 0, new_size > capacity
@@ -483,10 +613,173 @@ TEST(test_simple_vector, vec_resize)
         constexpr uint32_t size_4{8}, add{5};
         constexpr uint32_t resize_4{size_4 + add};
         simple_vector<uint32_t> vec_4(size_4);
-        const test_simple_vector<uint32_t> exp_data_4{
-            false, {0}, resize_4, utils::calculate_capacity(resize_4)};
+        constexpr test_simple_vector<uint32_t> exp_data_4{
+            false, {}, resize_4, resize_4};
 
         vec_4.resize(resize_4);
+
         test_vector_data(vec_4, exp_data_4);
+    }
+    // @note: size != 0,
+    /*{
+        EXPECT_TRUE(false);
+    }*/
+}
+
+TEST(test_simple_vector, vec_erase)
+{
+    // @note: DEATH size == 0, index < size
+    {
+        constexpr uint32_t amount_1{5};
+        simple_vector<uint32_t> vec_1;
+        constexpr test_simple_vector<uint32_t> exp_data_1{true, {}, ZERO, ZERO};
+
+        for (uint32_t index = 0; index < amount_1; ++index)
+        {
+            vec_1.erase(random_value(10, 40));
+            test_vector_data(vec_1, exp_data_1);
+        }
+    }
+    // @note: DEATH size != 0, index >= size
+    {
+        constexpr uint32_t size_2{6}, amount_2{5};
+        simple_vector<uint32_t> vec_2{size_2};
+        const test_simple_vector<uint32_t> exp_data_2{
+            false, {true, true, vec_2.data()},
+             size_2, vec_2.capacity()
+        };
+
+        for (uint32_t index = 0; index < amount_2; ++index)
+        {
+            vec_2.erase(random_value(size_2 + 1, 40));
+            test_vector_data(vec_2, exp_data_2);
+        }
+    }
+    // @note: size != 0, index == this->size
+    {
+        constexpr uint32_t size_3{7};
+        simple_vector<uint32_t> vec_3{size_3};
+        const test_simple_vector<uint32_t> exp_data_3{
+            false, {true, true, vec_3.data()},
+             size_3, vec_3.capacity()
+        };
+
+        vec_3.erase(size_3);
+        test_vector_data(vec_3, exp_data_3);
+    }
+    // @note: size != 0, index == size - 1
+    {
+        constexpr uint32_t size_4{10};
+        simple_vector<uint32_t> vec_4{size_4};
+        const test_simple_vector<uint32_t> exp_data_4{
+            false, {true, true, vec_4.data()},
+             size_4 - 1, vec_4.capacity()
+        };
+
+        vec_4.erase(size_4 - 1);
+        test_vector_data(vec_4, exp_data_4);
+    }
+    // @note: size != 0, index < size - 1
+    {
+        constexpr uint32_t size_5{12};
+        simple_vector<uint32_t> vec_5{size_5};
+        test_simple_vector<uint32_t> exp_data_5{
+            false, {true, true, vec_5.data()},
+             size_5, vec_5.capacity()
+        };
+
+        while (vec_5.size() != 0 && exp_data_5._size != 0)
+        {
+            vec_5.erase(random_value(1, vec_5.size() - 1));
+            exp_data_5._size -= 1;
+            test_vector_data(vec_5, exp_data_5);
+        }
+    }
+}
+
+TEST(test_simple_vector, vec_clear)
+{
+    // @note: capacity == 0
+    {
+        simple_vector<uint32_t> vec_1;
+        constexpr test_simple_vector<uint32_t> exp_data_1{true, {}, ZERO, ZERO};
+        vec_1.clear();
+        test_vector_data(vec_1, exp_data_1);
+    }
+    // @note: capacity != 0
+    {
+        constexpr uint32_t size_2{11};
+        simple_vector<uint32_t> vec_2{size_2};
+        const test_simple_vector<uint32_t> exp_data_2{
+            false, {true, true, vec_2.data()},
+             ZERO, vec_2.capacity()
+        };
+
+        vec_2.clear();
+        test_vector_data(vec_2, exp_data_2);
+    }
+}
+
+TEST(test_simple_vector, push_back)
+{
+    // @note: size == 0
+    {
+        simple_vector<uint32_t> vec_1;
+
+        constexpr test_simple_vector<uint32_t> exp_data_1{false, {}, 1, 1};
+
+        vec_1.push_back(1);
+
+        test_vector_data(vec_1, exp_data_1);
+
+        EXPECT_EQ(vec_1.back(), 1);
+    }
+    // @note: size < capacity
+    {
+        constexpr uint32_t capacity_2{10};
+        simple_vector<uint32_t> vec_2(5);
+
+        vec_2.reserve(capacity_2);
+
+        const test_simple_vector<uint32_t> exp_data_2{
+            false, {true, true, vec_2.data()},
+             vec_2.size() + 1, capacity_2
+        };
+
+        vec_2.push_back(1);
+
+        test_vector_data(vec_2, exp_data_2);
+        EXPECT_EQ(vec_2.back(), 1);
+    }
+    // @note: size > capacity
+    {
+        simple_vector<uint32_t> vec_3(5);
+        const test_simple_vector<uint32_t> exp_data_3{
+            false, {true, false, vec_3.data()},
+             vec_3.size() + 1,
+            vec_3.capacity() + 1
+        };
+
+        vec_3.push_back(1);
+
+        test_vector_data(vec_3, exp_data_3);
+        EXPECT_EQ(vec_3.back(), 1);
+    }
+}
+// @todo: pop_back
+TEST(test_simple_vector, pop_back)
+{
+    // @note: size == 0
+    {
+        simple_vector<uint32_t> vec_1;
+        constexpr test_simple_vector<uint32_t> exp_data_1{true, {}, 0, 0};
+
+        vec_1.pop_back();
+        test_vector_data(vec_1, exp_data_1);
+    }
+    // @note: size != 0
+    {
+        //
+        simple_vector<uint32_t> vec_2(5);
     }
 }
